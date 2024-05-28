@@ -9,6 +9,7 @@
 .metals
 metals.sbt
 .scala-build
+memo.md
 
 # sbt specific
 dist/*
