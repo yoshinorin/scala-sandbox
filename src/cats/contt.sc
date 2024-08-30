@@ -1,5 +1,5 @@
 // https://typelevel.org/cats/datatypes/contt.html
-//> using dep "org.typelevel::cats-core:2.10.0"
+//> using dep "org.typelevel::cats-core:2.12.0"
 
 case class User(id: Int, name: String, age: Int)
 sealed abstract class UserUpdateResult

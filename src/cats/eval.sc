@@ -1,5 +1,5 @@
 // https://typelevel.org/cats/datatypes/eval.html
-//> using dep "org.typelevel::cats-core:2.10.0"
+//> using dep "org.typelevel::cats-core:2.12.0"
 
 import cats.Eval
 import cats.syntax.all.*
