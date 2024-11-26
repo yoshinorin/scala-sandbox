@@ -4,8 +4,7 @@
 import cats.Eval
 import cats.syntax.all.*
 
-/** ===============================================
-  * Eager
+/** \=============================================== Eager
   */
 val eager = Eval.now {
   println("Running expensive calculation...")
@@ -17,9 +16,7 @@ val eager = Eval.now {
 eager.value
 // res0: Int = 7
 
-
-/** ===============================================
-  * Lazy
+/** \=============================================== Lazy
   */
 val lazyEval = Eval.later {
   println("Running expensive calculation...")
@@ -33,8 +30,7 @@ lazyEval.value
 lazyEval.value
 // res2: Int = 7
 
-/** ===============================================
-  * Always
+/** \=============================================== Always
   */
 val always = Eval.always {
   println("Running expensive calculation...")
@@ -50,20 +46,18 @@ always.value
 // Running expensive calculation...
 // res4: Int = 7
 
-
-/** ===============================================
-  * MutualRecursion
+/** \=============================================== MutualRecursion
   */
 object MutualRecursion {
   def even(n: Int): Eval[Boolean] =
     Eval.always(n == 0).flatMap {
-      case true => Eval.True
+      case true  => Eval.True
       case false => odd(n - 1)
     }
 
   def odd(n: Int): Eval[Boolean] =
     Eval.always(n == 0).flatMap {
-      case true => Eval.False
+      case true  => Eval.False
       case false => even(n - 1)
     }
 }

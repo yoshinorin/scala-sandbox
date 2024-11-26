@@ -14,7 +14,8 @@ val composed = Functor[List].compose[Option].map(listOption)(_ + 1)
 // res1: List[Option[Int]] = List(Some(value = 2), None, Some(value = 3))
 println(composed)
 
-def needsFunctor[F[_]: Functor, A](fa: F[A]): F[Unit] = Functor[F].map(fa)(_ => ())
+def needsFunctor[F[_]: Functor, A](fa: F[A]): F[Unit] =
+  Functor[F].map(fa)(_ => ())
 
 def foo: List[Option[Unit]] = {
   val listOptionFunctor = Functor[List].compose[Option]

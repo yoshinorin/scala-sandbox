@@ -9,7 +9,9 @@ case object Failed extends UserUpdateResult
 import cats.Eval
 import cats.data.ContT
 
-def updateUser(persistToDatabase: User => Eval[UserUpdateResult])(existingUser: User, newName: String, newAge: Int): Eval[UserUpdateResult] = {
+def updateUser(
+    persistToDatabase: User => Eval[UserUpdateResult]
+)(existingUser: User, newName: String, newAge: Int): Eval[UserUpdateResult] = {
   val trimmedName = newName.trim
   val cappedAge = newAge max 150
   val updatedUser = existingUser.copy(name = trimmedName, age = cappedAge)
@@ -17,13 +19,19 @@ def updateUser(persistToDatabase: User => Eval[UserUpdateResult])(existingUser: 
   persistToDatabase(updatedUser)
 }
 
-def updateUserCont(existingUser: User, newName: String, newAge: Int): ContT[Eval, UserUpdateResult, User] = ContT.apply[Eval, UserUpdateResult, User] { next =>  // next: User => Eval[UserUpdateResult]
-                    val trimmedName = newName.trim
-                    val cappedAge = newAge min 150
-                    val updatedUser = existingUser.copy(name = trimmedName, age = cappedAge)
+def updateUserCont(
+    existingUser: User,
+    newName: String,
+    newAge: Int
+): ContT[Eval, UserUpdateResult, User] =
+  ContT.apply[Eval, UserUpdateResult, User] {
+    next => // next: User => Eval[UserUpdateResult]
+      val trimmedName = newName.trim
+      val cappedAge = newAge min 150
+      val updatedUser = existingUser.copy(name = trimmedName, age = cappedAge)
 
-                    next(updatedUser)
-                  }
+      next(updatedUser)
+  }
 
 val existingUser = User(100, "Alice", 42)
 // existingUser: User = User(id = 100, name = "Alice", age = 42)
@@ -44,7 +52,6 @@ val eval = computation.run { user =>
 eval.value
 // Persisting updated user to the DB: User(100,Bob,150)
 // res0: UserUpdateResult = Succeeded(updatedUserId = 100)
-
 
 /*
  * Composition
@@ -77,7 +84,6 @@ anotherEval.value
 // Persisting these fields to the DB: Map(id -> 100, name -> Bob, age -> 150)
 // res1: UserUpdateResult = Succeeded(updatedUserId = 100)
 
-
 val updateUserModel: ContT[Eval, UserUpdateResult, User] =
   updateUserCont(existingUser, "Bob", 200).map { updatedUser =>
     println("Updated user model")
@@ -92,16 +98,18 @@ val updateUserModel: ContT[Eval, UserUpdateResult, User] =
 
 val persistToDb: User => ContT[Eval, UserUpdateResult, UserUpdateResult] = {
   user =>
-    ContT.apply[Eval, UserUpdateResult, UserUpdateResult] { next =>  // next: UserUpdateResult => Eval[UserUpdateResult]
-      println(s"Persisting updated user to the DB: $user")
-      next(Succeeded(user.id))
-      // next(Failed)
+    ContT.apply[Eval, UserUpdateResult, UserUpdateResult] {
+      next => // next: UserUpdateResult => Eval[UserUpdateResult]
+        println(s"Persisting updated user to the DB: $user")
+        next(Succeeded(user.id))
+        // next(Failed)
     }
 }
 
 // persistToDb: User => ContT[Eval, UserUpdateResult, UserUpdateResult] = <function1>
 
-val publishEvent: UserUpdateResult => ContT[Eval, UserUpdateResult, UserUpdateResult] = {
+val publishEvent
+    : UserUpdateResult => ContT[Eval, UserUpdateResult, UserUpdateResult] = {
   userUpdateResult =>
     ContT.apply[Eval, UserUpdateResult, UserUpdateResult] { next =>
       userUpdateResult match {
@@ -115,7 +123,6 @@ val publishEvent: UserUpdateResult => ContT[Eval, UserUpdateResult, UserUpdateRe
     }
 }
 // publishEvent: UserUpdateResult => ContT[Eval, UserUpdateResult, UserUpdateResult] = <function1>
-
 
 val chainOfContinuations =
   updateUserModel flatMap persistToDb flatMap publishEvent
@@ -140,7 +147,6 @@ evalComp.value
 // Publishing 'user updated' event for user ID 100
 // Finished!
 // res2: UserUpdateResult = Succeeded(updatedUserId = 100)
-
 
 println(evalComp.value)
 // Succeeded(100)
